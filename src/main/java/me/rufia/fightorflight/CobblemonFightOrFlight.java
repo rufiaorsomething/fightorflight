@@ -105,9 +105,7 @@ public class CobblemonFightOrFlight {
             pokemonEntity.targetSelector.addGoal(1, new HurtByTargetGoal(pokemonEntity));
             pokemonEntity.targetSelector.addGoal(2, new CaughtByTargetGoal(pokemonEntity));
             pokemonEntity.targetSelector.addGoal(3, new PokemonNearestAttackableTargetGoal<>(pokemonEntity, Player.class, 48.0f, true,true));
-            //pokemonEntity.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(pokemonEntity, Player.class, true));
 
-            //pokemonEntity.getAttributes().assignValues();
         }
     }
 
@@ -159,17 +157,15 @@ public class CobblemonFightOrFlight {
         double finalResult = levelAggressionCoefficient + atkDefRatioCoefficient + natureAggressionCoefficient;
 
 
-//        if (true){
-//            var pkmnString = "[" + pokemon.getSpecies().getName() + "]";
-//            LOGGER.info(pkmnString + " levelAggressionCoefficient: " + levelAggressionCoefficient);
-//            LOGGER.info(pkmnString + " atkDefRatioCoefficient: " + atkDefRatioCoefficient);
-//            LOGGER.info(pkmnString + " natureAggressionCoefficient: " + natureAggressionCoefficient
-//                    + " (" + pokemon.getNature().getDisplayName().toLowerCase() + ")");
+//        var pkmnString = "[" + pokemon.getSpecies().getName() + "]";
+//        LOGGER.info(pkmnString + " levelAggressionCoefficient: " + levelAggressionCoefficient);
+//        LOGGER.info(pkmnString + " atkDefRatioCoefficient: " + atkDefRatioCoefficient);
+//        LOGGER.info(pkmnString + " natureAggressionCoefficient: " + natureAggressionCoefficient
+//                + " (" + pokemon.getNature().getDisplayName().toLowerCase() + ")");
 //
-//            LOGGER.info("final FightOrFlightCoefficient: "
-//                    + levelAggressionCoefficient + "+" + atkDefRatioCoefficient + "+" + natureAggressionCoefficient
-//                    + " = " + finalResult);
-//        }
+//        LOGGER.info("final FightOrFlightCoefficient: "
+//                + levelAggressionCoefficient + "+" + atkDefRatioCoefficient + "+" + natureAggressionCoefficient
+//                + " = " + finalResult);
         return finalResult;
     }
 
