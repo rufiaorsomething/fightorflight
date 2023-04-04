@@ -4,8 +4,8 @@ plugins {
 }
 
 
-group = 'me.rufia'
-version = '0.3.11'
+group = 'me.rufia.fightorflight'
+version = '0.3.12'
 
 java {
     archivesBaseName = 'fightorflight'
@@ -53,7 +53,7 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', 'fightorflight'
             
             mods {
-                cobblemonfightorflight {
+                fightorflight {
                     source sourceSets.main
                 }
             }
@@ -69,7 +69,7 @@ minecraft {
                         property 'forge.enabledGameTestNamespaces', 'fightorflight'
             
             mods {
-                cobblemonfightorflight {
+                fightorflight {
                     source sourceSets.main
                 }
             }
@@ -88,7 +88,7 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', 'fightorflight'
 
             mods {
-                cobblemonfightorflight {
+                fightorflight {
                     source sourceSets.main
                 }
             }
@@ -102,10 +102,10 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'cobblemonfightorflight', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', 'fightorflight', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
-                cobblemonfightorflight {
+                fightorflight {
                     source sourceSets.main
                 }
             }
@@ -168,7 +168,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-                "Specification-Title": "cobblemonfightorflight",
+                "Specification-Title": "fightorflight",
                             "Specification-Vendor": "rufia",
                             "Specification-Version": "1", // We are version 1 of ourselves
                 "Implementation-Title": project.name,
