@@ -1,56 +1,28 @@
 package me.rufia.fightorflight;
 
-import com.cobblemon.mod.common.CobblemonEntities;
-import com.cobblemon.mod.common.api.pokemon.Natures;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
-import com.cobblemon.mod.common.pokemon.Species;
 import com.mojang.logging.LogUtils;
-import net.minecraft.advancements.CriteriaTriggers;
+import me.rufia.fightorflight.config.FightOrFlightCommonConfigs;
+import me.rufia.fightorflight.goals.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeMap;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
-import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
-import net.minecraft.world.entity.animal.PolarBear;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.InterModComms;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
-import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -69,6 +41,10 @@ public class CobblemonFightOrFlight {
 
         // Register the commonSetup method for modloading
         modEventBus.addListener(this::commonSetup);
+
+
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FightOrFlightCommonConfigs.SPEC, "fightorflight-common.toml");
+
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -102,9 +78,12 @@ public class CobblemonFightOrFlight {
             pokemonEntity.goalSelector.addGoal(3, new PokemonMeleeAttackGoal(pokemonEntity, pursuitSpeed, true));
             pokemonEntity.goalSelector.addGoal(4, new PokemonPanicGoal(pokemonEntity, fleeSpeed));
 
-            pokemonEntity.targetSelector.addGoal(1, new HurtByTargetGoal(pokemonEntity));
-            pokemonEntity.targetSelector.addGoal(2, new CaughtByTargetGoal(pokemonEntity));
-            pokemonEntity.targetSelector.addGoal(3, new PokemonNearestAttackableTargetGoal<>(pokemonEntity, Player.class, 48.0f, true,true));
+            pokemonEntity.targetSelector.addGoal(1, new PokemonOwnerHurtByTargetGoal(pokemonEntity));
+            pokemonEntity.targetSelector.addGoal(2, new PokemonOwnerHurtTargetGoal(pokemonEntity));
+            pokemonEntity.targetSelector.addGoal(3, new HurtByTargetGoal(pokemonEntity));
+            pokemonEntity.targetSelector.addGoal(4, new CaughtByTargetGoal(pokemonEntity));
+            pokemonEntity.targetSelector.addGoal(5, new PokemonNearestAttackableTargetGoal<>(pokemonEntity, Player.class, 48.0f, true,true));
+
 
         }
     }

@@ -5,7 +5,7 @@ plugins {
 
 
 group = 'me.rufia.fightorflight'
-version = '0.3.12'
+version = '0.4.5'
 
 java {
     archivesBaseName = 'fightorflight'

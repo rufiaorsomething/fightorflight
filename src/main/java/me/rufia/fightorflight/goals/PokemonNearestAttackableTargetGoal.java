@@ -1,6 +1,8 @@
-package me.rufia.fightorflight;
+package me.rufia.fightorflight.goals;
 
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
+import me.rufia.fightorflight.CobblemonFightOrFlight;
+import me.rufia.fightorflight.config.FightOrFlightCommonConfigs;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -22,8 +24,13 @@ public class PokemonNearestAttackableTargetGoal<T extends LivingEntity> extends 
 
     public boolean canUse() {
         //if (this.mob.getTarget() != null) { return false; }
+        if (FightOrFlightCommonConfigs.DO_POKEMON_ATTACK_UNPROVOKED.get() == false) { return false; }
 
         PokemonEntity pokemonEntity = (PokemonEntity)this.mob;
+
+
+        if (pokemonEntity.getPokemon().getLevel() < FightOrFlightCommonConfigs.MINIMUM_ATTACK_UNPROVOKED_LEVEL.get()) { return false; }
+
         if (pokemonEntity.getPokemon().isPlayerOwned()) { return false; }
         if (CobblemonFightOrFlight.getFightOrFlightCoefficient(pokemonEntity) <= CobblemonFightOrFlight.AUTO_AGGRO_THRESHOLD)
         {

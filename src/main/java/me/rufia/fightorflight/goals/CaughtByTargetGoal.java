@@ -1,4 +1,4 @@
-package me.rufia.fightorflight;
+package me.rufia.fightorflight.goals;
 
 import com.cobblemon.mod.common.entity.pokeball.EmptyPokeBallEntity;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
