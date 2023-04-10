@@ -48,8 +48,8 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
         }
     }
     public boolean isTargetInBattle(){
-        ServerPlayer targetAsPlayer = (ServerPlayer) this.mob.getTarget();
-        if (targetAsPlayer != null){
+        if (this.mob.getTarget() instanceof ServerPlayer){
+            ServerPlayer targetAsPlayer = (ServerPlayer) this.mob.getTarget();
             if (BattleRegistry.INSTANCE.getBattleByParticipatingPlayer(targetAsPlayer) != null) {
                 return true;
             }
@@ -186,9 +186,9 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
     }
 
     public boolean pokemonTryForceEncounter(PokemonEntity attackingPokemon, Entity hurtTarget){
-        PokemonEntity defendingPokemon = (PokemonEntity) hurtTarget;
-
-        if (defendingPokemon != null) {
+        if (hurtTarget instanceof PokemonEntity)
+        {
+            PokemonEntity defendingPokemon = (PokemonEntity) hurtTarget;
             if (attackingPokemon.getPokemon().isPlayerOwned()){
                 if (defendingPokemon.getPokemon().isPlayerOwned()){
                     if (false) { //(FightOrFlightCommonConfigs.FORCE_PLAYER_BATTLE_ON_POKEMON_HURT.get()) {
@@ -211,31 +211,37 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
     }
 
     public void pokemonForceEncounterPvP(PokemonEntity playerPokemon, PokemonEntity opponentPokemon){
-        ServerPlayer serverPlayer = (ServerPlayer)playerPokemon.getOwner();
-        ServerPlayer serverOpponent = (ServerPlayer)opponentPokemon.getOwner();
+        if (playerPokemon.getOwner() instanceof ServerPlayer
+        && opponentPokemon.getOwner() instanceof ServerPlayer){
+            ServerPlayer serverPlayer = (ServerPlayer)playerPokemon.getOwner();
+            ServerPlayer serverOpponent = (ServerPlayer)opponentPokemon.getOwner();
 
-        if (serverPlayer != null && serverOpponent != null
-            && serverPlayer != serverOpponent) {// I don't see why this should ever happen, but probably best to account for it
-            BattleBuilder.INSTANCE.pvp1v1(serverPlayer,
-                    serverOpponent,
-                    BattleFormat.Companion.getGEN_9_SINGLES(),
-                    false,
-                    false,
-                    (ServerPlayer) -> Cobblemon.INSTANCE.getStorage().getParty(ServerPlayer));
+            if (serverPlayer.isAlive() && serverOpponent.isAlive()){
+                if (serverPlayer != serverOpponent) {// I don't see why this should ever happen, but probably best to account for it
+                    BattleBuilder.INSTANCE.pvp1v1(serverPlayer,
+                            serverOpponent,
+                            BattleFormat.Companion.getGEN_9_SINGLES(),
+                            false,
+                            false,
+                            (ServerPlayer) -> Cobblemon.INSTANCE.getStorage().getParty(ServerPlayer));
+                }
+            }
         }
     }
     public void pokemonForceEncounterPvE(PokemonEntity playerPokemon, PokemonEntity wildPokemon){
-        ServerPlayer serverPlayer = (ServerPlayer)playerPokemon.getOwner();
-
-        if (serverPlayer != null){
-            BattleBuilder.INSTANCE.pve(serverPlayer,
-                    wildPokemon,
-                    playerPokemon.getUUID(),
-                    BattleFormat.Companion.getGEN_9_SINGLES(),
-                    false,
-                    false,
-                    Cobblemon.config.getDefaultFleeDistance(),
-                    Cobblemon.INSTANCE.getStorage().getParty(serverPlayer));
+        if (playerPokemon.getOwner() instanceof ServerPlayer)
+        {
+            ServerPlayer serverPlayer = (ServerPlayer)playerPokemon.getOwner();
+            if (serverPlayer.isAlive()){
+                BattleBuilder.INSTANCE.pve(serverPlayer,
+                        wildPokemon,
+                        playerPokemon.getPokemon().getUuid(),
+                        BattleFormat.Companion.getGEN_9_SINGLES(),
+                        false,
+                        false,
+                        Cobblemon.config.getDefaultFleeDistance(),
+                        Cobblemon.INSTANCE.getStorage().getParty(serverPlayer));
+            }
         }
     }
 
