@@ -26,9 +26,9 @@ public class PokemonOwnerHurtTargetGoal extends TargetGoal {
         if (FightOrFlightCommonConfigs.DO_POKEMON_DEFEND_OWNER.get() == false) { return false; }
 
         LivingEntity owner = this.pokemonEntity.getOwner();
-        if (owner != null) {
-            LogUtils.getLogger().info("playerOwnerHurtTargetGoal");
-        }
+//        if (owner != null) {
+//            LogUtils.getLogger().info("playerOwnerHurtTargetGoal");
+//        }
 
         if (owner != null && !this.pokemonEntity.isBusy()) {
             this.ownerLastHurt = owner.getLastHurtMob();

@@ -19,6 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.player.Player;
 
 
 public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
@@ -58,7 +59,7 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
     }
 
     public boolean shouldFightTarget(){
-        if (FightOrFlightCommonConfigs.DO_POKEMON_ATTACK.get() == false) { return false; }
+        //if (FightOrFlightCommonConfigs.DO_POKEMON_ATTACK.get() == false) { return false; }
 
         PokemonEntity pokemonEntity = (PokemonEntity)this.mob;
 
@@ -68,6 +69,23 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
         if (owner != null){
             if (FightOrFlightCommonConfigs.DO_POKEMON_DEFEND_OWNER.get() == false) { return false; }
             if (this.mob.getTarget() == null || this.mob.getTarget() == owner) { return false; }
+
+            if (this.mob.getTarget() instanceof PokemonEntity){
+                PokemonEntity targetPokemon = (PokemonEntity)this.mob.getTarget();
+                LivingEntity targetOwner = targetPokemon.getOwner();
+                if (targetOwner != null){
+                    if (targetOwner == owner) { return false; }
+                    if (FightOrFlightCommonConfigs.DO_PLAYER_POKEMON_ATTACK_OTHER_PLAYER_POKEMON.get() == false) {
+                        return false;
+                    }
+                }
+            }
+            if (this.mob.getTarget() instanceof Player){
+                if (FightOrFlightCommonConfigs.DO_PLAYER_POKEMON_ATTACK_OTHER_PLAYERS.get() == false){
+                    return false;
+                }
+            }
+
         } else {
             if (this.mob.getTarget() != null){
                 if (CobblemonFightOrFlight.getFightOrFlightCoefficient(pokemonEntity) <= 0) { return false; }
@@ -191,58 +209,80 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
             PokemonEntity defendingPokemon = (PokemonEntity) hurtTarget;
             if (attackingPokemon.getPokemon().isPlayerOwned()){
                 if (defendingPokemon.getPokemon().isPlayerOwned()){
-                    if (false) { //(FightOrFlightCommonConfigs.FORCE_PLAYER_BATTLE_ON_POKEMON_HURT.get()) {
-                        pokemonForceEncounterPvP(attackingPokemon, defendingPokemon);
+                    if (FightOrFlightCommonConfigs.FORCE_PLAYER_BATTLE_ON_POKEMON_HURT.get()) {
+                        return pokemonForceEncounterPvP(attackingPokemon, defendingPokemon);
                     }
                 } else {
                     if (FightOrFlightCommonConfigs.FORCE_WILD_BATTLE_ON_POKEMON_HURT.get()) {
-                        pokemonForceEncounterPvE(attackingPokemon, defendingPokemon);
-                        return true;
+                        return pokemonForceEncounterPvE(attackingPokemon, defendingPokemon);
                     }
                 }
             } else if (defendingPokemon.getPokemon().isPlayerOwned()) {
                 if (FightOrFlightCommonConfigs.FORCE_WILD_BATTLE_ON_POKEMON_HURT.get()) {
-                    pokemonForceEncounterPvE(defendingPokemon, attackingPokemon);
-                    return true;
+                    return pokemonForceEncounterPvE(defendingPokemon, attackingPokemon);
                 }
             }
         }
         return false;
     }
 
-    public void pokemonForceEncounterPvP(PokemonEntity playerPokemon, PokemonEntity opponentPokemon){
+    public boolean pokemonForceEncounterPvP(PokemonEntity playerPokemon, PokemonEntity opponentPokemon){
         if (playerPokemon.getOwner() instanceof ServerPlayer
         && opponentPokemon.getOwner() instanceof ServerPlayer){
             ServerPlayer serverPlayer = (ServerPlayer)playerPokemon.getOwner();
             ServerPlayer serverOpponent = (ServerPlayer)opponentPokemon.getOwner();
 
-            if (serverPlayer.isAlive() && serverOpponent.isAlive()){
-                if (serverPlayer != serverOpponent) {// I don't see why this should ever happen, but probably best to account for it
-                    BattleBuilder.INSTANCE.pvp1v1(serverPlayer,
-                            serverOpponent,
-                            BattleFormat.Companion.getGEN_9_SINGLES(),
-                            false,
-                            false,
-                            (ServerPlayer) -> Cobblemon.INSTANCE.getStorage().getParty(ServerPlayer));
-                }
+            if (serverPlayer == serverOpponent // I don't see why this should ever happen, but probably best to account for it
+                    || !canBattlePlayer(serverPlayer)
+                    || !canBattlePlayer(serverOpponent)) {
+                return false;
             }
+
+            BattleBuilder.INSTANCE.pvp1v1(serverPlayer,
+                    serverOpponent,
+                    BattleFormat.Companion.getGEN_9_SINGLES(),
+                    false,
+                    false,
+                    (ServerPlayer) -> Cobblemon.INSTANCE.getStorage().getParty(ServerPlayer));
         }
+        return false;
     }
-    public void pokemonForceEncounterPvE(PokemonEntity playerPokemon, PokemonEntity wildPokemon){
+    public boolean pokemonForceEncounterPvE(PokemonEntity playerPokemon, PokemonEntity wildPokemon){
         if (playerPokemon.getOwner() instanceof ServerPlayer)
         {
             ServerPlayer serverPlayer = (ServerPlayer)playerPokemon.getOwner();
-            if (serverPlayer.isAlive()){
-                BattleBuilder.INSTANCE.pve(serverPlayer,
-                        wildPokemon,
-                        playerPokemon.getPokemon().getUuid(),
-                        BattleFormat.Companion.getGEN_9_SINGLES(),
-                        false,
-                        false,
-                        Cobblemon.config.getDefaultFleeDistance(),
-                        Cobblemon.INSTANCE.getStorage().getParty(serverPlayer));
+
+            if (!canBattlePlayer(serverPlayer)) {
+                return false;
             }
+
+            BattleBuilder.INSTANCE.pve(serverPlayer,
+                    wildPokemon,
+                    playerPokemon.getPokemon().getUuid(),
+                    BattleFormat.Companion.getGEN_9_SINGLES(),
+                    false,
+                    false,
+                    Cobblemon.config.getDefaultFleeDistance(),
+                    Cobblemon.INSTANCE.getStorage().getParty(serverPlayer));
         }
+        return false;
     }
 
+    public boolean canBattlePlayer(ServerPlayer serverPlayer){
+        boolean playerHasAlivePokemon = false;
+        for (Pokemon pokemon : Cobblemon.INSTANCE.getStorage().getParty(serverPlayer)) {
+            if (!pokemon.isFainted()) {
+                playerHasAlivePokemon = true;
+                break;
+            }
+        }
+
+        if (BattleRegistry.INSTANCE.getBattleByParticipatingPlayer(serverPlayer) != null
+            || !playerHasAlivePokemon
+            || !serverPlayer.isAlive()) {
+            return false;
+        }
+
+        return true;
+    }
 }

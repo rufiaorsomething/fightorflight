@@ -89,6 +89,8 @@ public class CobblemonFightOrFlight {
     }
 
     public static double getFightOrFlightCoefficient(PokemonEntity pokemonEntity){
+        if (FightOrFlightCommonConfigs.DO_POKEMON_ATTACK.get() == false) { return -100; }
+
         Pokemon pokemon = pokemonEntity.getPokemon();
         double pkmnLevel = pokemon.getLevel();
         //double levelAggressionCoefficient = (pokemon.getLevel() - 20);
