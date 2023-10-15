@@ -1,50 +1,48 @@
 package me.rufia.fightorflight.goals;
 
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
-import com.mojang.logging.LogUtils;
-import me.rufia.fightorflight.config.FightOrFlightCommonConfigs;
+import me.rufia.fightorflight.CobblemonFightOrFlight;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 
 import java.util.EnumSet;
 
-public class PokemonOwnerHurtByTargetGoal extends TargetGoal {
+public class PokemonOwnerHurtTargetGoal extends TargetGoal {
     private final PokemonEntity pokemonEntity;
-    private LivingEntity ownerLastHurtBy;
+    private LivingEntity ownerLastHurt;
     private int timestamp;
 
-    public PokemonOwnerHurtByTargetGoal(PokemonEntity pokemonEntity) {
+    public PokemonOwnerHurtTargetGoal(PokemonEntity pokemonEntity) {
         super(pokemonEntity, false);
         this.pokemonEntity = pokemonEntity;
         this.setFlags(EnumSet.of(Goal.Flag.TARGET));
     }
 
     public boolean canUse() {
-        if (FightOrFlightCommonConfigs.DO_POKEMON_DEFEND_OWNER.get() == false) { return false; }
+        if (!CobblemonFightOrFlight.config().do_pokemon_defend_owner) { return false; }
 
         LivingEntity owner = this.pokemonEntity.getOwner();
 //        if (owner != null) {
-//            LogUtils.getLogger().info("playerOwnerHurtByTargetGoal");
+//            LogUtils.getLogger().info("playerOwnerHurtTargetGoal");
 //        }
 
         if (owner != null && !this.pokemonEntity.isBusy()) {
-            this.ownerLastHurtBy = owner.getLastHurtByMob();
-            int i = owner.getLastHurtByMobTimestamp();
-            return i != this.timestamp &&
-                    this.canAttack(this.ownerLastHurtBy, TargetingConditions.DEFAULT) && this.pokemonEntity.wantsToAttack(this.ownerLastHurtBy, owner);
+            this.ownerLastHurt = owner.getLastHurtMob();
+            int i = owner.getLastHurtMobTimestamp();
+            return i != this.timestamp
+                    && this.canAttack(this.ownerLastHurt, TargetingConditions.DEFAULT) && this.pokemonEntity.wantsToAttack(this.ownerLastHurt, owner);
         } else {
             return false;
         }
     }
 
     public void start() {
-        this.mob.setTarget(this.ownerLastHurtBy);
+        this.mob.setTarget(this.ownerLastHurt);
         LivingEntity owner = this.pokemonEntity.getOwner();
         if (owner != null) {
-            this.timestamp = owner.getLastHurtByMobTimestamp();
+            this.timestamp = owner.getLastHurtMobTimestamp();
         }
 
         super.start();

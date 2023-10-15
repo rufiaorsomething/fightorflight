@@ -8,11 +8,9 @@ import com.cobblemon.mod.common.battles.BattleRegistry;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import me.rufia.fightorflight.CobblemonFightOrFlight;
-import me.rufia.fightorflight.config.FightOrFlightCommonConfigs;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -42,18 +40,15 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
 
         super.tick();
 
-        if (!FightOrFlightCommonConfigs.DO_POKEMON_ATTACK_IN_BATTLE.get()){
+        if (!CobblemonFightOrFlight.config().do_pokemon_attack_in_battle){
             if (isTargetInBattle()){
                 this.mob.getNavigation().setSpeedModifier(0);
             }
         }
     }
     public boolean isTargetInBattle(){
-        if (this.mob.getTarget() instanceof ServerPlayer){
-            ServerPlayer targetAsPlayer = (ServerPlayer) this.mob.getTarget();
-            if (BattleRegistry.INSTANCE.getBattleByParticipatingPlayer(targetAsPlayer) != null) {
-                return true;
-            }
+        if (this.mob.getTarget() instanceof ServerPlayer targetAsPlayer){
+            return BattleRegistry.INSTANCE.getBattleByParticipatingPlayer(targetAsPlayer) != null;
         }
         return false;
     }
@@ -63,25 +58,24 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
 
         PokemonEntity pokemonEntity = (PokemonEntity)this.mob;
 
-        if (pokemonEntity.getPokemon().getLevel() < FightOrFlightCommonConfigs.MINIMUM_ATTACK_LEVEL.get()) { return false; }
+        if (pokemonEntity.getPokemon().getLevel() < CobblemonFightOrFlight.config().minimum_attack_level) { return false; }
 
         LivingEntity owner = pokemonEntity.getOwner();
         if (owner != null){
-            if (FightOrFlightCommonConfigs.DO_POKEMON_DEFEND_OWNER.get() == false) { return false; }
+            if (!CobblemonFightOrFlight.config().do_pokemon_defend_owner) { return false; }
             if (this.mob.getTarget() == null || this.mob.getTarget() == owner) { return false; }
 
-            if (this.mob.getTarget() instanceof PokemonEntity){
-                PokemonEntity targetPokemon = (PokemonEntity)this.mob.getTarget();
+            if (this.mob.getTarget() instanceof PokemonEntity targetPokemon){
                 LivingEntity targetOwner = targetPokemon.getOwner();
                 if (targetOwner != null){
                     if (targetOwner == owner) { return false; }
-                    if (FightOrFlightCommonConfigs.DO_PLAYER_POKEMON_ATTACK_OTHER_PLAYER_POKEMON.get() == false) {
+                    if (!CobblemonFightOrFlight.config().do_player_pokemon_attack_other_player_pokemon) {
                         return false;
                     }
                 }
             }
             if (this.mob.getTarget() instanceof Player){
-                if (FightOrFlightCommonConfigs.DO_PLAYER_POKEMON_ATTACK_OTHER_PLAYERS.get() == false){
+                if (!CobblemonFightOrFlight.config().do_player_pokemon_attack_other_players){
                     return false;
                 }
             }
@@ -114,7 +108,7 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
     }
 
     public boolean pokemonDoHurtTarget(Entity hurtTarget) {
-        if (!FightOrFlightCommonConfigs.DO_POKEMON_ATTACK_IN_BATTLE.get()) {
+        if (!CobblemonFightOrFlight.config().do_pokemon_attack_in_battle) {
             if (isTargetInBattle()) { return false; }
         }
         PokemonEntity pokemonEntity = (PokemonEntity)this.mob;
@@ -133,8 +127,7 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
             float hurtDamage = maxAttack / 10f;
             float hurtKnockback = 1.0f;
 
-            if (hurtTarget instanceof LivingEntity) {
-                LivingEntity livingHurtTarget = (LivingEntity)hurtTarget;
+            if (hurtTarget instanceof LivingEntity livingHurtTarget) {
                 int effectStrength = Math.max(pkmLevel / 10, 1);
 
                 switch (primaryType.getName()) {
@@ -187,10 +180,10 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
 
 
 
-            boolean flag = hurtTarget.hurt(DamageSource.mobAttack(this.mob), hurtDamage);
+            boolean flag = hurtTarget.hurt(this.mob.level().damageSources().mobAttack(this.mob), hurtDamage);
             if (flag) {
                 if (hurtKnockback > 0.0F && hurtTarget instanceof LivingEntity) {
-                    ((LivingEntity)hurtTarget).knockback((double)(hurtKnockback * 0.5F), (double) Mth.sin(this.mob.getYRot() * ((float)Math.PI / 180F)), (double)(-Mth.cos(this.mob.getYRot() * ((float)Math.PI / 180F))));
+                    ((LivingEntity)hurtTarget).knockback(hurtKnockback * 0.5F, Mth.sin(this.mob.getYRot() * ((float)Math.PI / 180F)), -Mth.cos(this.mob.getYRot() * ((float)Math.PI / 180F)));
                     this.mob.setDeltaMovement(this.mob.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
                 }
 
@@ -204,21 +197,20 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
     }
 
     public boolean pokemonTryForceEncounter(PokemonEntity attackingPokemon, Entity hurtTarget){
-        if (hurtTarget instanceof PokemonEntity)
+        if (hurtTarget instanceof PokemonEntity defendingPokemon)
         {
-            PokemonEntity defendingPokemon = (PokemonEntity) hurtTarget;
             if (attackingPokemon.getPokemon().isPlayerOwned()){
                 if (defendingPokemon.getPokemon().isPlayerOwned()){
-                    if (FightOrFlightCommonConfigs.FORCE_PLAYER_BATTLE_ON_POKEMON_HURT.get()) {
+                    if (CobblemonFightOrFlight.config().force_player_battle_on_pokemon_hurt) {
                         return pokemonForceEncounterPvP(attackingPokemon, defendingPokemon);
                     }
                 } else {
-                    if (FightOrFlightCommonConfigs.FORCE_WILD_BATTLE_ON_POKEMON_HURT.get()) {
+                    if (CobblemonFightOrFlight.config().force_wild_battle_on_pokemon_hurt) {
                         return pokemonForceEncounterPvE(attackingPokemon, defendingPokemon);
                     }
                 }
             } else if (defendingPokemon.getPokemon().isPlayerOwned()) {
-                if (FightOrFlightCommonConfigs.FORCE_WILD_BATTLE_ON_POKEMON_HURT.get()) {
+                if (CobblemonFightOrFlight.config().force_wild_battle_on_pokemon_hurt) {
                     return pokemonForceEncounterPvE(defendingPokemon, attackingPokemon);
                 }
             }
@@ -227,10 +219,8 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
     }
 
     public boolean pokemonForceEncounterPvP(PokemonEntity playerPokemon, PokemonEntity opponentPokemon){
-        if (playerPokemon.getOwner() instanceof ServerPlayer
-        && opponentPokemon.getOwner() instanceof ServerPlayer){
-            ServerPlayer serverPlayer = (ServerPlayer)playerPokemon.getOwner();
-            ServerPlayer serverOpponent = (ServerPlayer)opponentPokemon.getOwner();
+        if (playerPokemon.getOwner() instanceof ServerPlayer serverPlayer
+        && opponentPokemon.getOwner() instanceof ServerPlayer serverOpponent){
 
             if (serverPlayer == serverOpponent // I don't see why this should ever happen, but probably best to account for it
                     || !canBattlePlayer(serverPlayer)
@@ -240,17 +230,17 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
 
             BattleBuilder.INSTANCE.pvp1v1(serverPlayer,
                     serverOpponent,
+                    null,
+                    null,
                     BattleFormat.Companion.getGEN_9_SINGLES(),
                     false,
-                    false,
-                    (ServerPlayer) -> Cobblemon.INSTANCE.getStorage().getParty(ServerPlayer));
+                    false);
         }
         return false;
     }
     public boolean pokemonForceEncounterPvE(PokemonEntity playerPokemon, PokemonEntity wildPokemon){
-        if (playerPokemon.getOwner() instanceof ServerPlayer)
+        if (playerPokemon.getOwner() instanceof ServerPlayer serverPlayer)
         {
-            ServerPlayer serverPlayer = (ServerPlayer)playerPokemon.getOwner();
 
             if (!canBattlePlayer(serverPlayer)) {
                 return false;
@@ -277,12 +267,8 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
             }
         }
 
-        if (BattleRegistry.INSTANCE.getBattleByParticipatingPlayer(serverPlayer) != null
-            || !playerHasAlivePokemon
-            || !serverPlayer.isAlive()) {
-            return false;
-        }
-
-        return true;
+        return BattleRegistry.INSTANCE.getBattleByParticipatingPlayer(serverPlayer) == null
+                && playerHasAlivePokemon
+                && serverPlayer.isAlive();
     }
 }

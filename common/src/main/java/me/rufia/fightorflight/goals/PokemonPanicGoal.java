@@ -27,8 +27,7 @@ public class PokemonPanicGoal extends PanicGoal {
             return true;
         }
         if (this.mob.getLastHurtByMob() != null) {
-            if (CobblemonFightOrFlight.getFightOrFlightCoefficient(pokemonEntity) > 0) { return false; }
-            return true;
+            return !(CobblemonFightOrFlight.getFightOrFlightCoefficient(pokemonEntity) > 0);
         }
         return false;
         //return super.shouldPanic();
