@@ -32,7 +32,7 @@ public class CaughtByTargetGoal extends TargetGoal {
         List<Object> busyLocks = pokemonEntity.getBusyLocks();
         for (int i = 0; i < busyLocks.size(); i++){
             if (busyLocks.get(i) instanceof EmptyPokeBallEntity){
-                LogUtils.getLogger().info("Pokemon in process of being caught");
+//                LogUtils.getLogger().info("Pokemon in process of being caught");
                 EmptyPokeBallEntity pokeBallEntity = (EmptyPokeBallEntity)busyLocks.get(i);
 
                 if (pokeBallEntity.getOwner() instanceof LivingEntity){
@@ -43,7 +43,7 @@ public class CaughtByTargetGoal extends TargetGoal {
         }
 
         if (lastCaughtByMob != null) {
-            if (lastCaughtByMob.getType() == EntityType.PLAYER && this.mob.level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER)) {
+            if (lastCaughtByMob.getType() == EntityType.PLAYER && this.mob.level().getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER)) {
                 return false;
             } else {
                 return this.canAttack(lastCaughtByMob, HURT_BY_TARGETING);

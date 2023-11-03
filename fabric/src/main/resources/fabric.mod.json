@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "fightorflight",
+  "version": "0.5.0",
+  "name": "Cobblemon Fight or Flight Fabric",
+  "description": "Makes Cobblemon run away or fight back in response to a player attack or failed capture.",
+  "authors": [
+    "rufia"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "MIT License",
+  "icon": "assets/fightorflight/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "me.rufia.fightorflight.CobblemonFightOrFlightFabric"
+    ]
+  },
+  "mixins": [
+    "fightorflight.mixins.json"
+  ],
+  "depends": {
+    "java": ">=17",
+    "minecraft": ">=1.20.1",
+    "fabricloader": ">=0.14.21",
+    "fabric": "*",
+    "cobblemon": ">=1.4.0"
+  }
+}

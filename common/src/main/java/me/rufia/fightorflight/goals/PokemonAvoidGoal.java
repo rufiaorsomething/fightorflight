@@ -1,8 +1,8 @@
 package me.rufia.fightorflight.goals;
 
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
+import com.mojang.logging.LogUtils;
 import me.rufia.fightorflight.CobblemonFightOrFlight;
-import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -11,11 +11,7 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
-
-import javax.annotation.Nullable;
-import java.util.EnumSet;
-import java.util.function.Predicate;
-import com.mojang.logging.LogUtils;
+import org.jetbrains.annotations.Nullable;
 
 public class PokemonAvoidGoal extends Goal {
     protected final PathfinderMob mob;
@@ -116,7 +112,7 @@ public class PokemonAvoidGoal extends Goal {
 
     public void tick() {
         PokemonEntity pokemonEntity = (PokemonEntity)this.mob;
-        LogUtils.getLogger().info(pokemonEntity.getPokemon().getSpecies().getName() + " is running away " + this.mob.distanceToSqr(this.toAvoid) + " distanceSqr from here");
+//        LogUtils.getLogger().info(pokemonEntity.getPokemon().getSpecies().getName() + " is running away " + this.mob.distanceToSqr(this.toAvoid) + " distanceSqr from here");
 
         if (this.mob.distanceToSqr(this.toAvoid) < (maxDist * 0.5)) {
             this.mob.getNavigation().setSpeedModifier(this.sprintSpeedModifier);
