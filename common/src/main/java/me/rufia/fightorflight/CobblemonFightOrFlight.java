@@ -48,6 +48,11 @@ public class CobblemonFightOrFlight {
 			addPokemonGoal(event.getPokemonEntity());
 			return Unit.INSTANCE;
 		});
+
+		CobblemonEvents.POKEMON_SENT_POST.subscribe(Priority.HIGHEST, event -> {
+			addPokemonGoal(event.getPokemonEntity());
+			return Unit.INSTANCE;
+		});
 	}
 
 	public static void addPokemonGoal(PokemonEntity pokemonEntity) {
