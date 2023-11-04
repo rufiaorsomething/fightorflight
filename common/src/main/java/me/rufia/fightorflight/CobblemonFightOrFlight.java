@@ -21,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.mojang.logging.LogUtils;
 
 public class CobblemonFightOrFlight {
 	public static final String MODID = "fightorflight";
@@ -40,6 +41,7 @@ public class CobblemonFightOrFlight {
 		config = AutoConfig.getConfigHolder(FightOrFlightCommonConfigModel.class).getConfig();
 
 		CobblemonEvents.POKEMON_ENTITY_SPAWN.subscribe(Priority.HIGHEST, event -> {
+			//LogUtils.getLogger().info(((PokemonEntity)event.getEntity()).getPokemon().getSpecies().getName() + "spawn event");
 			addPokemonGoal(event.getEntity());
 			return Unit.INSTANCE;
 		});

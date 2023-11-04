@@ -14,7 +14,7 @@ public class FightOrFlightCommonConfigModel implements ConfigData {
     @Comment("Do especially aggressive Pokemon attack unprovoked?")
     public boolean do_pokemon_attack_unprovoked = true;
 
-    @Comment("Do aggro Pokemon wait for their target to finish any battles before attacking?")
+    @Comment("Do aggro Pokemon attack their targets even if they're in the middle of a battles?")
     public boolean do_pokemon_attack_in_battle = false;
 
     @Comment("Do player Pokemon defend their owners when they attack or are attacked by other mobs?")
@@ -38,4 +38,12 @@ public class FightOrFlightCommonConfigModel implements ConfigData {
 
     @Comment("The minimum level a Pokemon needs to be to attack unprovoked.")
     public int minimum_attack_unprovoked_level = 10;
+
+    @Comment("The amount of damage a pokemon would do on contact if it had 0 ATK and Sp.ATK.")
+    @ConfigEntry.BoundedDiscrete(min = 0, max = 100)
+    public float minimum_attack_damage = 1.0f;
+
+    @Comment("The amount of damage a pokemon would do on contact if it had 255 ATK or Sp.ATK.")
+    @ConfigEntry.BoundedDiscrete(min = 0, max = 100)
+    public float maximum_attack_damage = 25.0f;
 }

@@ -1,6 +1,7 @@
 package me.rufia.fightorflight.goals;
 
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
+import com.mojang.logging.LogUtils;
 import me.rufia.fightorflight.CobblemonFightOrFlight;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -25,7 +26,7 @@ public class PokemonOwnerHurtTargetGoal extends TargetGoal {
 
         LivingEntity owner = this.pokemonEntity.getOwner();
 //        if (owner != null) {
-//            LogUtils.getLogger().info("playerOwnerHurtTargetGoal");
+//            LogUtils.getLogger().info(pokemonEntity.getPokemon().getSpecies().getName() + " owner: " + this.pokemonEntity.getPokemon().getOwnerPlayer());
 //        }
 
         if (owner != null && !this.pokemonEntity.isBusy()) {

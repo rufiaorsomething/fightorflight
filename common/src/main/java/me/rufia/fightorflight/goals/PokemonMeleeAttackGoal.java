@@ -7,6 +7,7 @@ import com.cobblemon.mod.common.battles.BattleFormat;
 import com.cobblemon.mod.common.battles.BattleRegistry;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
+import kotlin.math.UMathKt;
 import me.rufia.fightorflight.CobblemonFightOrFlight;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -23,6 +24,8 @@ import net.minecraft.world.entity.player.Player;
 public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
     public int ticksUntilNewAngerParticle = 0;
 
+    public int ticksUntilNewAngerCry = 0;
+
     public PokemonMeleeAttackGoal(PathfinderMob mob, double speedModifier, boolean followingTargetEvenIfNotSeen) {
         super(mob, speedModifier, followingTargetEvenIfNotSeen);
     }
@@ -36,6 +39,12 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
                 ticksUntilNewAngerParticle = 10;
             }
             else { ticksUntilNewAngerParticle = ticksUntilNewAngerParticle - 1; }
+
+            if (ticksUntilNewAngerCry < 1) {
+                pokemonEntity.cry();
+                ticksUntilNewAngerCry = 100 + (int)(Math.random() * 200);
+            }
+            else { ticksUntilNewAngerCry = ticksUntilNewAngerCry - 1; }
         }
 
         super.tick();
@@ -83,6 +92,9 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
         } else {
             if (this.mob.getTarget() != null){
                 if (CobblemonFightOrFlight.getFightOrFlightCoefficient(pokemonEntity) <= 0) { return false; }
+
+                LivingEntity targetEntity = this.mob.getTarget();
+                if (this.mob.distanceToSqr(targetEntity.getX(), targetEntity.getY(), targetEntity.getZ()) > 400) { return false; }
             }
         }
         //if (pokemonEntity.getPokemon().isPlayerOwned()) { return false; }
@@ -106,6 +118,17 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
             pokemonDoHurtTarget(target);
         }
     }
+    public float calculatePokemonDamage(PokemonEntity pokemonEntity){
+        float maxAttack = Math.max(pokemonEntity.getPokemon().getAttack(), pokemonEntity.getPokemon().getSpecialAttack());
+        maxAttack = Math.min(maxAttack, 255.0f);
+        maxAttack = maxAttack / 255.0f;
+        //return maxAttack / 10f;
+
+        float minDmg = CobblemonFightOrFlight.config().minimum_attack_damage;
+        float maxDmg = CobblemonFightOrFlight.config().maximum_attack_damage;
+
+        return minDmg + ((maxDmg - minDmg) * maxAttack);
+    }
 
     public boolean pokemonDoHurtTarget(Entity hurtTarget) {
         if (!CobblemonFightOrFlight.config().do_pokemon_attack_in_battle) {
@@ -117,14 +140,14 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
         if (!pokemonTryForceEncounter(pokemonEntity, hurtTarget)){
 
             int pkmLevel = pokemon.getLevel();
-            float maxAttack = Math.max(pokemonEntity.getPokemon().getAttack(), pokemonEntity.getPokemon().getSpecialAttack());
+            //float maxAttack = Math.max(pokemonEntity.getPokemon().getAttack(), pokemonEntity.getPokemon().getSpecialAttack());
 
             ElementalType primaryType = pokemon.getPrimaryType();
 
             //LogUtils.getLogger().info("target took " + primaryType.getName() + " damage");
 
 
-            float hurtDamage = maxAttack / 10f;
+            float hurtDamage = calculatePokemonDamage(pokemonEntity);
             float hurtKnockback = 1.0f;
 
             if (hurtTarget instanceof LivingEntity livingHurtTarget) {
@@ -164,13 +187,17 @@ public class PokemonMeleeAttackGoal extends MeleeAttackGoal {
                         break;
                     case "grass":
                         this.mob.addEffect(new MobEffectInstance(MobEffects.REGENERATION, (effectStrength + 2) * 20, 0), this.mob);
+                        break;
                     case "dragon":
                         hurtDamage = hurtDamage + 3;
+                        break;
                     case "flying":
                         hurtKnockback = hurtKnockback * 2;
+                        break;
                     case "water":
                         hurtKnockback = hurtKnockback * 2;
                         livingHurtTarget.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, (effectStrength + 2) * 25, 0), this.mob);
+                        break;
 
                     default:
                         break;
