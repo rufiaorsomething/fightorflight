@@ -3,7 +3,7 @@
   "package": "me.rufia.fightorflight.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "MobEntityAccessor",
+    "MobEntityAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

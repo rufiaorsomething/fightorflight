@@ -2,6 +2,11 @@ package me.rufia.fightorflight;
 
 import net.minecraftforge.fml.common.Mod;
 
+
+import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
 @Mod(CobblemonFightOrFlight.MODID)
 @Mod.EventBusSubscriber
 public class CobblemonFightOrFlightForge {
@@ -9,7 +14,16 @@ public class CobblemonFightOrFlightForge {
     public CobblemonFightOrFlightForge() {
         CobblemonFightOrFlight.init((pokemonEntity, priority, goal) -> pokemonEntity.goalSelector.addGoal(priority, goal));
     }
+    @SubscribeEvent
+    public static void onEntityJoined(EntityJoinLevelEvent event) {
+        //LOGGER.info("onEntityJoined");
 
+        if (event.getEntity() instanceof PokemonEntity) {
+            PokemonEntity pokemonEntity = (PokemonEntity)event.getEntity();
+
+            CobblemonFightOrFlight.addPokemonGoal(pokemonEntity);
+        }
+    }
     //    @SubscribeEvent
 //    public static void onEntityAttributes(EntityAttributeModificationEvent event){
 //        LOGGER.info("onEntityAttributes");
